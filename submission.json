@@ -1,0 +1,130 @@
+{
+  "api_key": "IVY26-XXXXXXXXXXXX",
+  "candidate": {
+    "name": "",
+    "email": "",
+    "repo_url": "",
+    "demo_url": ""
+  },
+  "answers": {
+    "total_listing_records": 3782,
+    "unique_properties": 3782,
+    "active_listings": 2983,
+    "corrupt_listing_ids": [
+      "100-4000397",
+      "100-4000449",
+      "100-4000457",
+      "100-4000491",
+      "100-4000738",
+      "DWE-4001424",
+      "DWE-4002247",
+      "DWE-4002374",
+      "MAG-4000145",
+      "MAG-4001981",
+      "MAG-4002776",
+      "MAG-4003100",
+      "SQU-4000583",
+      "SQU-4002483",
+      "ZER-4000021",
+      "ZER-4001287"
+    ],
+    "total_monthly_rent": 4363200,
+    "avg_price_per_sqft_2bhk": 15899.72,
+    "costliest_project": {
+      "project_id": "P40231",
+      "price_max_inr": 9980000
+    },
+    "listings_last_7_days": 105,
+    "fake_listing_ids": [
+      "100-4001484",
+      "100-4001961",
+      "DWE-4000745",
+      "MAG-4000075",
+      "MAG-4000870",
+      "MAG-4001467",
+      "MAG-4002092",
+      "SQU-4001342",
+      "ZER-4002683"
+    ],
+    "projects_with_wrong_listing_count": 306
+  },
+  "findings": [
+    {
+      "endpoint": "/v1/listings",
+      "category": "pagination",
+      "documented": "The API documents page-based pagination using the page and limit parameters, with a maximum limit of 200.",
+      "actual": "The page parameter is ignored. Requests with page=1, page=2, and page=3 returned the same result set. Offset-based pagination works instead, and the API returns at most 50 records per request even when a larger limit is requested.",
+      "how_found": "Called /v1/listings?page=1&limit=50, /v1/listings?page=2&limit=50, and /v1/listings?page=3&limit=50 and compared the returned listing IDs. All three responses contained the same records. Then called /v1/listings?offset=50&limit=50 and observed a different result set. Requests with larger limit values were also capped at 50 records.",
+      "impact": "A client following the documented page-based pagination can repeatedly retrieve the same records instead of progressing through the collection. The frontend therefore uses offset-based pagination with a 50-record page size.",
+      "evidence": [
+        "GET /v1/listings?page=1&limit=50",
+        "GET /v1/listings?page=2&limit=50 — same records as page=1",
+        "GET /v1/listings?page=3&limit=50 — same records as page=1",
+        "GET /v1/listings?offset=50&limit=50 — different records",
+        "limit values above 50 return at most 50 records"
+      ]
+    },
+    {
+      "endpoint": "/v1/favourites",
+      "category": "missing_endpoint",
+      "documented": "The API documents POST /v1/favourites for adding a listing to a user's favourites.",
+      "actual": "POST /v1/favourites returns HTTP 404 with {\"detail\":\"Not Found\"}.",
+      "how_found": "Attempted the documented POST request to /v1/favourites using an authenticated session. The server responded with HTTP 404 Not Found instead of creating a favourite.",
+      "impact": "The documented server-side favourites operation cannot be used by the frontend. The application therefore implements saved listings locally, scoped per logged-in user, so saving and removing listings still works across page reloads and re-login.",
+      "evidence": [
+        "POST /v1/favourites → HTTP 404 Not Found"
+      ]
+    },
+    {
+      "endpoint": "/v1/listing/{id}",
+      "category": "missing_endpoint",
+      "documented": "The API documents GET /v1/listing/{id} for retrieving a listing by its ID.",
+      "actual": "GET /v1/listing/{id} returns HTTP 404 Not Found for valid listing IDs.",
+      "how_found": "Requested the documented listing-detail endpoint using a valid listing ID. The server returned HTTP 404 instead of the listing details. The same listing could be retrieved from GET /v1/listings, confirming that the listing exists.",
+      "impact": "A frontend cannot retrieve an individual listing through the documented detail endpoint. The application therefore retrieves the listing collection and locates the requested listing by listing_id when loading the detail page.",
+      "evidence": [
+        "A valid listing ID returned by GET /v1/listings",
+        "GET /v1/listing/{id} → HTTP 404 Not Found"
+      ]
+    },
+    {
+      "endpoint": "/v1/projects",
+      "category": "units",
+      "documented": "The API documents project price_min and price_max as Money values in Indian rupees.",
+      "actual": "Project price_min and price_max values are represented in lakhs rather than rupees. For example, project P40231 has price_min=35.5 and price_max=99.8, corresponding to approximately ₹35.5 lakh and ₹99.8 lakh.",
+      "how_found": "Fetched the projects collection and inspected project price values. Compared the values with the documented INR unit and with the corresponding project listing prices. The magnitude of the API values is consistent with lakh units rather than raw INR.",
+      "impact": "Treating these values as rupees produces incorrect displayed prices and an incorrect costliest-project calculation. The application converts project prices from lakhs to INR for display and for Question 7.",
+      "evidence": [
+        "P40231"
+      ]
+    },
+    {
+      "endpoint": "/auth/login",
+      "category": "auth",
+      "documented": "The API documentation describes the API key as a query parameter and documents the login/token behavior without a refresh-token flow.",
+      "actual": "The API accepts the API key through the X-API-Key request header. A successful login response also includes access_token, refresh_token, expires_in, token_type, and refresh_url.",
+      "how_found": "Tested authentication using the documented API-key approach and inspected the successful login response. The working client sends the API key using the X-API-Key header. The login response contains both access and refresh token fields that are not represented by the documented login contract.",
+      "impact": "A client implemented strictly from the documented authentication contract may send the API key incorrectly or fail to account for the returned refresh-token flow. The application therefore sends X-API-Key and stores the returned access-token information for the authenticated session.",
+      "evidence": [
+        "POST /auth/login",
+        "Successful login response includes access_token",
+        "Successful login response includes refresh_token",
+        "Successful login response includes expires_in",
+        "Successful login response includes refresh_url"
+      ]
+    },
+    {
+      "endpoint": "/v1/listings",
+      "category": "completeness",
+      "documented": "The listings endpoint is documented as returning active sale listings.",
+      "actual": "The response includes both live and inactive listing records. In the retrieved dataset, 2,983 records have is_live=true and 799 have is_live=false.",
+      "how_found": "Fetched the complete listings collection and inspected the is_live field for every returned record. Both true and false values are present.",
+      "impact": "A client assuming the endpoint contains only active listings can display inactive listings or use them in analytics incorrectly. The application explicitly handles the is_live field when determining active listings.",
+      "evidence": [
+        "GET /v1/listings",
+        "is_live=true: 2,983 records",
+        "is_live=false: 799 records"
+      ]
+    }
+  ]
+}

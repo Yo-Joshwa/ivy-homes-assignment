@@ -1,0 +1,57 @@
+export type Listing = {
+  listing_id: string;
+  listing_url?: string;
+  website?: string;
+  city_id?: number;
+  apartment_name?: string;
+  locality?: string;
+  property_type?: string;
+  bedroom?: number;
+  bathroom?: number;
+  balcony?: number;
+  floor?: number;
+  total_floors?: number;
+  furnishing?: string;
+  facing_direction?: string;
+  covered_parking?: number;
+  price?: number;
+  carpet_area?: number;
+  super_built_up_area?: number;
+  latitude?: number;
+  longitude?: number;
+  posted_by?: string;
+  posted_by_name?: string;
+  posted_by_contact?: string;
+  project_id?: string | null;
+  description?: string;
+  posted_at?: string;
+  is_verified?: boolean;
+  is_live?: boolean;
+};
+
+export type Rental = Listing & { title?: string; deposit?: number; maintenance?: number };
+export type Project = {
+  project_id: string;
+  project_url?: string;
+  city_id?: number;
+  apartment_name?: string;
+  developer_name?: string;
+  locality?: string;
+  project_status?: string;
+  total_units?: number;
+  total_towers?: number;
+  total_floors?: number;
+  launch_date?: string;
+  possession_date?: string;
+  rera_number?: string;
+  min_area_sqft?: number;
+  max_area_sqft?: number;
+  total_listings?: number;
+  price_min?: number;
+  price_max?: number;
+  amenities?: string[];
+  latitude?: number;
+  longitude?: number;
+};
+
+export type Collection<T> = { total: number; page: number; page_size: number; results: T[] };
