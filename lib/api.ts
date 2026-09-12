@@ -4,8 +4,8 @@ const BASE =
 
 const API_KEY = process.env.NEXT_PUBLIC_IVY_API_KEY || "";
 
-console.log("API KEY LOADED:", API_KEY.length > 0);
-console.log("API KEY LENGTH:", API_KEY.length);
+// console.log("API KEY LOADED:", API_KEY.length > 0);
+// console.log("API KEY LENGTH:", API_KEY.length);
 
 type RequestOptions = RequestInit & {
   token?: string;

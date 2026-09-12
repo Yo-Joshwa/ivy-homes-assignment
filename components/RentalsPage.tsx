@@ -35,7 +35,7 @@ export default function RentalsPage() {
           session?.token,
         );
 
-        console.log("TOTAL RENTALS:", rentals.length);
+        // console.log("TOTAL RENTALS:", rentals.length);
 
         setAllRentals(rentals);
       } catch (err) {
