@@ -71,9 +71,7 @@
       "actual": "POST /v1/favourites returns HTTP 404 with {\"detail\":\"Not Found\"}.",
       "how_found": "Attempted the documented POST request to /v1/favourites using an authenticated session. The server responded with HTTP 404 Not Found instead of creating a favourite.",
       "impact": "The documented server-side favourites operation cannot be used by the frontend. The application therefore implements saved listings locally, scoped per logged-in user, so saving and removing listings still works across page reloads and re-login.",
-      "evidence": [
-        "POST /v1/favourites → HTTP 404 Not Found"
-      ]
+      "evidence": ["POST /v1/favourites → HTTP 404 Not Found"]
     },
     {
       "endpoint": "/v1/listing/{id}",
@@ -94,9 +92,7 @@
       "actual": "Project price_min and price_max values are represented in lakhs rather than rupees. For example, project P40231 has price_min=35.5 and price_max=99.8, corresponding to approximately ₹35.5 lakh and ₹99.8 lakh.",
       "how_found": "Fetched the projects collection and inspected project price values. Compared the values with the documented INR unit and with the corresponding project listing prices. The magnitude of the API values is consistent with lakh units rather than raw INR.",
       "impact": "Treating these values as rupees produces incorrect displayed prices and an incorrect costliest-project calculation. The application converts project prices from lakhs to INR for display and for Question 7.",
-      "evidence": [
-        "P40231"
-      ]
+      "evidence": ["P40231"]
     },
     {
       "endpoint": "/auth/login",

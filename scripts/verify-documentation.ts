@@ -17,7 +17,6 @@ async function main(){
   await check("projects","/v1/projects?page=1&limit=1");
   await check("analytics","/v1/analytics/summary");
 
-  // Pagination/filter/sort experiments should be expanded after observing real responses.
   console.log("Next: compare documented filter/sort semantics against unfiltered records.");
 }
 main().catch(e=>{console.error(e);process.exit(1)});

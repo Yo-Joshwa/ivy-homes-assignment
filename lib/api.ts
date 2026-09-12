@@ -52,8 +52,8 @@ async function api<T>(
   if (!res.ok) {
     const detail =
       typeof body === "object" &&
-      body !== null &&
-      "detail" in body
+        body !== null &&
+        "detail" in body
         ? (body as { detail?: string }).detail
         : undefined;
 
@@ -182,16 +182,16 @@ export const apiClient = {
     ),
 
   analytics: async (token?: string) => {
-  try {
-    return await api<Record<string, unknown>>(
-      "/v1/analytics/summary",
-      { token }
-    );
-  } catch (error) {
-    console.warn("Analytics endpoint unavailable:", error);
-    return null;
-  }
-},
+    try {
+      return await api<Record<string, unknown>>(
+        "/v1/analytics/summary",
+        { token }
+      );
+    } catch (error) {
+      console.warn("Analytics endpoint unavailable:", error);
+      return null;
+    }
+  },
 };
 export async function fetchAll<T>(
   endpoint: string,

@@ -11,53 +11,53 @@ export default function RentalsPage() {
   const [page, setPage] = useState(1);
   const [locality, setLocality] = useState("");
   useEffect(() => {
-  const s = getSession();
-  if (!s) return;
+    const s = getSession();
+    if (!s) return;
 
-  async function loadRentals() {
-    try {
-      const allRentals: Rental[] = [];
-      let currentPage = 1;
-      let apiTotal = 0;
+    async function loadRentals() {
+      try {
+        const allRentals: Rental[] = [];
+        let currentPage = 1;
+        let apiTotal = 0;
 
-      while (true) {
-        const r = await apiClient.rentals(
-          {
-            page: currentPage,
-            limit: 200,
-            locality: locality || undefined,
-          },
-          s.token
-        );
+        while (true) {
+          const r = await apiClient.rentals(
+            {
+              page: currentPage,
+              limit: 200,
+              locality: locality || undefined,
+            },
+            s?.token,
+          );
 
-        allRentals.push(...r.results);
-        apiTotal = r.total;
+          allRentals.push(...r.results);
+          apiTotal = r.total;
 
-        if (
-          r.results.length === 0 ||
-          allRentals.length >= r.total ||
-          r.results.length < 200
-        ) {
-          break;
+          if (
+            r.results.length === 0 ||
+            allRentals.length >= r.total ||
+            r.results.length < 200
+          ) {
+            break;
+          }
+
+          currentPage++;
         }
 
-        currentPage++;
+        setTotal(apiTotal);
+
+        const start = (page - 1) * 20;
+        const end = start + 20;
+
+        setItems(allRentals.slice(start, end));
+      } catch {
+        setItems([]);
+        setTotal(0);
       }
-
-      setTotal(apiTotal);
-
-      const start = (page - 1) * 20;
-      const end = start + 20;
-
-      setItems(allRentals.slice(start, end));
-    } catch {
-      setItems([]);
-      setTotal(0);
     }
-  }
 
-  loadRentals();
-}, [page, locality]);
+    loadRentals();
+  }, [page, locality]);
   return (
     <AppShell>
       <h1>Rentals</h1>

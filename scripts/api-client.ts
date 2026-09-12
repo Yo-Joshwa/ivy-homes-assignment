@@ -4,17 +4,17 @@ import path from "node:path";
 export const BASE = process.env.IVY_BASE_URL || "https://solve.ivy.homes";
 export const KEY = process.env.IVY_API_KEY || "";
 
-export async function request<T>(endpoint: string, init: RequestInit = {}): Promise<{status:number; data:T; headers:Headers}> {
+export async function request<T>(endpoint: string, init: RequestInit = {}): Promise<{ status: number; data: T; headers: Headers }> {
   const url = new URL(endpoint, BASE);
   const headers = new Headers(init.headers);
-  headers.set("Accept","application/json");
-  if (init.body) headers.set("Content-Type","application/json");
+  headers.set("Accept", "application/json");
+  if (init.body) headers.set("Content-Type", "application/json");
   if (KEY) headers.set("X-API-Key", KEY);
-  const response = await fetch(url,{...init,headers});
+  const response = await fetch(url, { ...init, headers });
   const text = await response.text();
   let data: T;
   try { data = JSON.parse(text) as T; } catch { data = text as T; }
-  return {status:response.status,data,headers:response.headers};
+  return { status: response.status, data, headers: response.headers };
 }
 
 export async function fetchAll<T>(
@@ -50,29 +50,29 @@ export async function fetchAll<T>(
     });
 
     const page = response.data.results || [];
-const total = response.data.total;
+    const total = response.data.total;
 
-const remaining = total - results.length;
-const actualPage = page.slice(0, remaining);
+    const remaining = total - results.length;
+    const actualPage = page.slice(0, remaining);
 
-results.push(...actualPage);
+    results.push(...actualPage);
 
-console.log(
-  `${endpoint}: offset=${offset}, got=${page.length}, kept=${actualPage.length}, total=${total}`
-);
+    console.log(
+      `${endpoint}: offset=${offset}, got=${page.length}, kept=${actualPage.length}, total=${total}`
+    );
 
-if (results.length >= total || page.length === 0) {
-  break;
-}
+    if (results.length >= total || page.length === 0) {
+      break;
+    }
 
-offset += limit;
+    offset += limit;
   }
 
   return results;
 }
 
-export async function writeJson(name:string,data:unknown){
-  const dir=path.resolve("data/investigation");
-  await fs.mkdir(dir,{recursive:true});
-  await fs.writeFile(path.join(dir,name),JSON.stringify(data,null,2));
+export async function writeJson(name: string, data: unknown) {
+  const dir = path.resolve("data/investigation");
+  await fs.mkdir(dir, { recursive: true });
+  await fs.writeFile(path.join(dir, name), JSON.stringify(data, null, 2));
 }

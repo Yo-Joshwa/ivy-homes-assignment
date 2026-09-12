@@ -37,7 +37,6 @@ async function handler(
   // First try Authorization header
   let authorization = request.headers.get("authorization");
 
-  // Otherwise recover login token from HttpOnly cookie
   if (!authorization) {
     const token = request.cookies.get("ivy_token")?.value;
 
@@ -87,7 +86,6 @@ async function handler(
     headers: responseHeaders,
   });
 
-  // Save login token in secure server-side cookie
   if (
     endpoint === "/auth/login" &&
     request.method === "POST" &&
@@ -112,7 +110,6 @@ async function handler(
     }
   }
 
-  // Clear token on logout
   if (
     endpoint === "/auth/logout" &&
     request.method === "POST"

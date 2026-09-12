@@ -8,44 +8,44 @@ import { Project } from "../lib/types";
 export default function ProjectsPage() {
   const [items, setItems] = useState<Project[]>([]);
   useEffect(() => {
-  const s = getSession();
-  if (!s) return;
+    const s = getSession();
+    if (!s) return;
 
-  async function loadProjects() {
-    try {
-      const allProjects: Project[] = [];
-      let currentPage = 1;
+    async function loadProjects() {
+      try {
+        const allProjects: Project[] = [];
+        let currentPage = 1;
 
-      while (true) {
-        const r = await apiClient.projects(
-          {
-            page: currentPage,
-            limit: 100,
-          },
-          s.token
-        );
+        while (true) {
+          const r = await apiClient.projects(
+            {
+              page: currentPage,
+              limit: 100,
+            },
+            s?.token,
+          );
 
-        allProjects.push(...r.results);
+          allProjects.push(...r.results);
 
-        if (
-          r.results.length === 0 ||
-          allProjects.length >= r.total ||
-          r.results.length < 100
-        ) {
-          break;
+          if (
+            r.results.length === 0 ||
+            allProjects.length >= r.total ||
+            r.results.length < 100
+          ) {
+            break;
+          }
+
+          currentPage++;
         }
 
-        currentPage++;
+        setItems(allProjects);
+      } catch {
+        setItems([]);
       }
-
-      setItems(allProjects);
-    } catch {
-      setItems([]);
     }
-  }
 
-  loadProjects();
-}, []);
+    loadProjects();
+  }, []);
   return (
     <AppShell>
       <h1>Projects</h1>
