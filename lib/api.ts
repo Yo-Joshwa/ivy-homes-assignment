@@ -227,9 +227,9 @@ export async function fetchAll<T>(
 
     results.push(...actualPage);
 
-    console.log(
-      `${endpoint}: offset=${offset}, got=${page.length}, kept=${actualPage.length}, total=${total}`
-    );
+    // console.log(
+    //   `${endpoint}: offset=${offset}, got=${page.length}, kept=${actualPage.length}, total=${total}`
+    // );
 
     if (results.length >= total || page.length === 0) {
       break;
